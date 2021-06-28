@@ -174,7 +174,16 @@ int const Pbox[32] =
 
 
 // LIST OF FUNCTIONS
-
+/*
+*	Computes power: returns x^y.
+*/
+int power(int x, int y)
+{
+    int result = 1;
+    for (int i = 0; i < y; ++i)
+        result *= x;
+    return result;
+}
 /*
 *	display a 64-bit binary number
 *	print the binary representation of above number
@@ -553,7 +562,7 @@ void rounds(uint64_t *data, uint64_t key)
 		{
 			if(((right_block << (6 * ii + jj)) & FIRSTBIT) == FIRSTBIT)
 			{
-				coordy += 2 ^ (4 - jj);
+				coordy += power(2, 4 - jj);
 			}
 		}
 		substitued = DesSbox[ii][coordx][coordy];
