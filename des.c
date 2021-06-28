@@ -9,33 +9,26 @@
 
 #define FIRSTBIT 0x8000000000000000
 
-int power(int x, int y)
-{
+int power(int x, int y) {
     int result = 1;
     for (int i = 0; i < y; ++i)
         result *= x;
     return result;
 }
 
-void printbits(uint64_t v)
-{
-	for(int ii = 0; ii < 64; ii++)
-	{
-		if(((v << ii) & FIRSTBIT) == (uint64_t)0)
-		{
+void printbits(uint64_t v) {
+	for(int ii = 0; ii < 64; ii++) {
+		if(((v << ii) & FIRSTBIT) == (uint64_t)0) {
 			printf("0");
 		}
-		else
-		{
+		else {
 			printf("1");
 		}
 	}
 }
 
-void addbit(uint64_t *block, uint64_t from, int position_from, int position_to)
-{
-	if(((from << (position_from)) & FIRSTBIT) != 0)
-	{
+void addbit(uint64_t *block, uint64_t from, int position_from, int position_to) {
+	if(((from << (position_from)) & FIRSTBIT) != 0) {
 		*block += (FIRSTBIT >> position_to);
 	}
 }
@@ -43,14 +36,11 @@ void addbit(uint64_t *block, uint64_t from, int position_from, int position_to)
 void Permutation(uint64_t *data, int initial) {
 	uint64_t data_temp = 0;
 
-	for(int ii = 0; ii < 64; ii++)
-	{
-		if(initial == 1)
-		{
+	for(int ii = 0; ii < 64; ii++) {
+		if(initial == 1) {
 			addbit(&data_temp, *data, InitialPermutation[ii] - 1, ii);
 		}
-		else
-		{
+		else {
 			addbit(&data_temp, *data, FinalPermutation[ii] - 1, ii);
 		}
 	}
@@ -107,8 +97,7 @@ void key_schedule(uint64_t *key, uint64_t *next_key, int round) {
 	}
 }
 
-void rounds(uint64_t *data, uint64_t key)
-{
+void rounds(uint64_t *data, uint64_t key) {
 	uint64_t right_block = 0;
 	uint64_t right_block_temp = 0;
 	for(int ii = 0; ii < 48; ii++) {
@@ -149,6 +138,8 @@ int main(void) {
   
   printf("Plaintext:\t"); printbits(data); printf("\n");
   printf("Key:\t\t"); printbits(key); printf("\n");
+  
+  // Round keys
   uint64_t a_key[16];
 	a_key[0] = key;
 	uint64_t next_key;
@@ -158,24 +149,16 @@ int main(void) {
 			a_key[ii + 1] = next_key;
 		}
 	}
-
-  printf("Roundkeys:\t"); printbits(key); printf("\n");
-  for (int i = 0; i < 16; i++) {
-    printf("  [%d]:\t\t", i+1); printbits(a_key[i]); 
-    if (a_key[i] == correct_key[i]) printf(" OK!");
-    printf("\n");
-  }
-  
   
   // initial permutation
   Permutation(&data, 1);
-  printf("After IP:\t"); printbits(data); printf(" OK!\n");
+
+  // 16 rounds
   for(int ii = 0; ii < 16; ii++) {
     rounds(&data, a_key[ii]);
   }
-  printf("After 16 rounds:"); printbits(data); printf("\n");
-  
-  
+
+  // Reverse order
   uint64_t reverse = 0;
   for(int ii = 0; ii < 32; ii++) {
     addbit(&reverse, data, ii + 32, ii);
