@@ -1,0 +1,3 @@
+[submodule "mersenne-twister-sudoku-solver"]
+	path = mersenne-twister-sudoku-solver
+	url = https://github.com/tfpf/mersenne-twister-sudoku-solver.git
