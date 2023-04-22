@@ -301,8 +301,7 @@ uint64_t des_decrypt(uint64_t subkeys[16], uint64_t state)
 }
 
 /******************************************************************************
- * Test this implementation of DES. See
- * https://groups.google.com/g/sci.crypt/c/F6hVxM6RC7Q/m/kKjaRA-mCB4J.
+ * Test this implementation of DES.
  *****************************************************************************/
 void des_test(void)
 {
