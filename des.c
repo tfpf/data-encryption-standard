@@ -227,8 +227,8 @@ void des_key_schedule(uint64_t key, uint64_t subkeys[16])
     uint32_t right = key & 0xFFFFFFFU;
     for(int i = 0; i < 16; ++i)
     {
-        left = ((left << R[i]) | (left >> (28 - R[i]))) & 0xFFFFFFF;
-        right = ((right << R[i]) | (right >> (28 - R[i]))) & 0xFFFFFFF;
+        left = ((left << R[i]) | (left >> (28 - R[i]))) & 0xFFFFFFFU;
+        right = ((right << R[i]) | (right >> (28 - R[i]))) & 0xFFFFFFFU;
         uint64_t lr = (uint64_t)left << 28 | right;
         subkeys[i] = des_transform(PC2, 48, lr, 56);
     }
