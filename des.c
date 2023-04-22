@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,12 +239,12 @@ void des_key_schedule(uint64_t key, uint64_t subkeys[16])
  * encryption and decryption.
  *
  * @param subkeys Round keys.
- * @param state Data to encrypt.
+ * @param state Data to encrypt or decrypt.
  * @param begin Index of the first round: 0 or 15.
  * @param end Index of the last round: 15 or 0.
  * @param step Direction: 1 or -1.
  *
- * @return Block of data, mutated.
+ * @return Block of data, encrypted or decrypted.
  *****************************************************************************/
 uint64_t des_rounds(uint64_t subkeys[16], uint64_t state, int begin, int end, int step)
 {
@@ -275,7 +276,7 @@ uint64_t des_rounds(uint64_t subkeys[16], uint64_t state, int begin, int end, in
 }
 
 /******************************************************************************
- * Encrypt a block of data.
+ * Encrypt a block of data using DES.
  *
  * @param subkeys Round keys.
  * @param state Data to encrypt.
@@ -288,7 +289,7 @@ uint64_t des_encrypt(uint64_t subkeys[16], uint64_t state)
 }
 
 /******************************************************************************
- * Decrypt a block of data.
+ * Decrypt a block of data using DES.
  *
  * @param subkeys Round keys.
  * @param state Data to decrypt.
@@ -354,6 +355,21 @@ void des_test(void)
 }
 
 /******************************************************************************
+ * Demonstrate DES.
+ *
+ * @param key Secret key.
+ * @param state Data to encrypt or decrypt.
+ * @param encrypt Whether to encrypt or decrypt.
+ *****************************************************************************/
+void des_demo(uint64_t key, uint64_t state, bool encrypt)
+{
+    uint64_t subkeys[16];
+    des_key_schedule(key, subkeys);
+    uint64_t state_ = encrypt ? des_encrypt(subkeys, state) : des_decrypt(subkeys, state);
+    printf("%016" PRIX64 " %016" PRIX64 " %016" PRIX64 "\n", key, state, state_);
+}
+
+/******************************************************************************
  * Main function.
  *****************************************************************************/
 int main(int const argc, char const *argv[])
@@ -366,11 +382,14 @@ int main(int const argc, char const *argv[])
 
     mt19937_64_seed(0);
     uint64_t key = argc >= 2 ? parse_hexadecimal(argv[1]) : mt19937_64_rand();
-    uint64_t plaintext = argc >= 3 ? parse_hexadecimal(argv[2]) : mt19937_64_rand();
-    uint64_t subkeys[16];
-    des_key_schedule(key, subkeys);
-    uint64_t ciphertext = des_encrypt(subkeys, plaintext);
-    uint64_t plaintext_ = des_decrypt(subkeys, ciphertext);
-    printf("%016" PRIX64 " %016" PRIX64 " %016" PRIX64 " %016" PRIX64 "\n", key, plaintext, ciphertext, plaintext_);
+    uint64_t state = argc >= 3 ? parse_hexadecimal(argv[2]) : mt19937_64_rand();
+    if(argc >= 4 && strcmp(argv[3], "decrypt") == 0)
+    {
+        des_demo(key, state, false);
+    }
+    else
+    {
+        des_demo(key, state, true);
+    }
     return EXIT_SUCCESS;
 }

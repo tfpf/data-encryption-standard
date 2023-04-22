@@ -5,24 +5,32 @@ My B. Tech. thesis (2018–9) was on side-channel attacks, and I thereby became 
 team put together a poorly-written copy-pasted implementation and messed around with it until we got it to work on an
 ATmega328P.
 
-Several years later, I decided to revisit the horibble code and rewrite it properly. And here we are.
+Several years later, with more programming experience and a better understanding of cryptographic specifications, I
+decided to revisit the horrible code and rewrite it properly. And here we are.
 
-# Compile
+### Compile
 ```
 make
 ```
 
-# Test
+### Test
 ```
 ./des test
 ```
 
 The test vectors are from [sci.crypt](https://groups.google.com/g/sci.crypt/c/F6hVxM6RC7Q/m/kKjaRA-mCB4J).
 
-# Run
+### Encrypt
 ```
-./des [key] [plaintext]
+./des [key] [data]
 ```
 
-`[key]` is the secret key; `[plaintext]` is the data to encrypt. Both must contain only hexadecimal digits. Otherwise,
-they will be randomly generated using MT19937.
+`[key]` is the secret key; `[data]` is the data to encrypt. They must contain only hexadecimal digits. Otherwise, they
+will be set to zero. If not provided, they will be generated randomly using MT19937, which I have included my
+implementation of as a submodule here.
+
+### Decrypt
+```
+./des [key] [data] decrypt
+```
+As above, except that `[key]` and `[data]` must be provided.
