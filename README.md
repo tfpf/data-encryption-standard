@@ -8,6 +8,11 @@ ATmega328P.
 Several years later, with more programming experience and a better understanding of cryptographic specifications, I
 decided to revisit the horrible code and rewrite it properly. And here we are.
 
+### Download
+```
+git clone --recurse-submodules https://github.com/tfpf/data-encryption-standard.git
+```
+
 ### Compile
 ```
 make
