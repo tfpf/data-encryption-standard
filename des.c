@@ -1,5 +1,8 @@
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "mt19937_64.h"
 
@@ -221,12 +224,12 @@ void des_key_schedule(uint64_t key, uint64_t subkeys[16])
     key = des_transform(PC1, 56, key, 64);
     uint32_t left = key >> 28;
     uint32_t right = key & 0xFFFFFFFU;
-    for(int r = 0; r < 16; ++r)
+    for(int i = 0; i < 16; ++i)
     {
-        left = (left << R[r]) | (left >> (28 - R[r]));
-        right = (right << R[r]) | (right >> (28 - R[r]));
+        left = ((left << R[i]) | (left >> (28 - R[i]))) & 0xFFFFFFF;
+        right = ((right << R[i]) | (right >> (28 - R[i]))) & 0xFFFFFFF;
         uint64_t lr = (uint64_t)left << 28 | right;
-        subkeys[r] = des_transform(PC2, 48, lr, 56);
+        subkeys[i] = des_transform(PC2, 48, lr, 56);
     }
 }
 
@@ -298,18 +301,77 @@ uint64_t des_decrypt(uint64_t subkeys[16], uint64_t state)
 }
 
 /******************************************************************************
+ * Test this implementation of DES. See
+ * https://groups.google.com/g/sci.crypt/c/F6hVxM6RC7Q/m/kKjaRA-mCB4J.
+ *****************************************************************************/
+void des_test(void)
+{
+    uint64_t vectors[33][3] =
+    {
+        {0x0000000000000000U, 0x0000000000000000U, 0x8CA64DE9C1B123A7U},
+        {0x0000000000000000U, 0xFFFFFFFFFFFFFFFFU, 0x355550B2150E2451U},
+        {0x0101010101010101U, 0x0123456789ABCDEFU, 0x617B3A0CE8F07100U},
+        {0x0113B970FD34F2CEU, 0x059B5E0851CF143AU, 0x86A560F10EC6D85BU},
+        {0x0123456789ABCDEFU, 0x0000000000000000U, 0xD5D44FF720683D0DU},
+        {0x0123456789ABCDEFU, 0x1111111111111111U, 0x17668DFC7292532DU},
+        {0x0131D9619DC1376EU, 0x5CD54CA83DEF57DAU, 0x7A389D10354BD271U},
+        {0x0170F175468FB5E6U, 0x0756D8E0774761D2U, 0x0CD3DA020021DC09U},
+        {0x018310DC409B26D6U, 0x1D9D5C5018F728C2U, 0x5F4C038ED12B2E41U},
+        {0x025816164629B007U, 0x480D39006EE762F2U, 0xA1F9915541020B56U},
+        {0x04689104C2FD3B2FU, 0x26955F6835AF609AU, 0x5C513C9C4886C088U},
+        {0x04B915BA43FEB5B6U, 0x42FD443059577FA2U, 0xAF37FB421F8C4095U},
+        {0x07A1133E4A0B2686U, 0x0248D43806F67172U, 0x868EBB51CAB4599AU},
+        {0x07A7137045DA2A16U, 0x3BDD119049372802U, 0xDFD64A815CAF1A0FU},
+        {0x1111111111111111U, 0x0123456789ABCDEFU, 0x8A5AE1F81AB8F2DDU},
+        {0x1111111111111111U, 0x1111111111111111U, 0xF40379AB9E0EC533U},
+        {0x1C587F1C13924FEFU, 0x305532286D6F295AU, 0x63FAC0D034D9F793U},
+        {0x1F08260D1AC2465EU, 0x6B056E18759F5CCAU, 0xEF1BF03E5DFA575AU},
+        {0x1F1F1F1F0E0E0E0EU, 0x0123456789ABCDEFU, 0xDB958605F8C8C606U},
+        {0x3000000000000000U, 0x1000000000000001U, 0x958E6E627A05557BU},
+        {0x37D06BB516CB7546U, 0x164D5E404F275232U, 0x0A2AEEAE3FF4AB77U},
+        {0x3849674C2602319EU, 0x51454B582DDF440AU, 0x7178876E01F19B2AU},
+        {0x43297FAD38E373FEU, 0x762514B829BF486AU, 0xEA676B2CB7DB2B7AU},
+        {0x49793EBC79B3258FU, 0x437540C8698F3CFAU, 0x6FBF1CAFCFFD0556U},
+        {0x49E95D6D4CA229BFU, 0x02FE55778117F12AU, 0x5A6B612CC26CCE4AU},
+        {0x4FB05E1515AB73A7U, 0x072D43A077075292U, 0x2F22E49BAB7CA1ACU},
+        {0x584023641ABA6176U, 0x004BD6EF09176062U, 0x88BF0DB6D70DEE56U},
+        {0x7CA110454A1A6E57U, 0x01A1D6D039776742U, 0x690F5B0D9A26939BU},
+        {0xE0FEE0FEF1FEF1FEU, 0x0123456789ABCDEFU, 0xEDBFD1C66C29CCC7U},
+        {0xFEDCBA9876543210U, 0x0123456789ABCDEFU, 0xED39D950FA74BCC4U},
+        {0xFEDCBA9876543210U, 0xFFFFFFFFFFFFFFFFU, 0x2A2BB008DF97C2F2U},
+        {0xFFFFFFFFFFFFFFFFU, 0x0000000000000000U, 0xCAAAAF4DEAF1DBAEU},
+        {0xFFFFFFFFFFFFFFFFU, 0xFFFFFFFFFFFFFFFFU, 0x7359B2163E4EDC58U},
+    };
+    for(int i = 0; i < 33; ++i)
+    {
+        uint64_t key = vectors[i][0];
+        uint64_t plaintext = vectors[i][1];
+        uint64_t ciphertext = vectors[i][2];
+        uint64_t subkeys[16];
+        des_key_schedule(key, subkeys);
+        assert(ciphertext == des_encrypt(subkeys, plaintext));
+        assert(plaintext == des_decrypt(subkeys, ciphertext));
+    }
+}
+
+/******************************************************************************
  * Main function.
  *****************************************************************************/
 int main(int const argc, char const *argv[])
 {
-    mt19937_64_seed(0);
+    if(argc >= 2 && strcmp(argv[1], "test") == 0)
+    {
+        des_test();
+        return EXIT_SUCCESS;
+    }
 
+    mt19937_64_seed(0);
     uint64_t key = argc >= 2 ? parse_hexadecimal(argv[1]) : mt19937_64_rand();
     uint64_t plaintext = argc >= 3 ? parse_hexadecimal(argv[2]) : mt19937_64_rand();
-
     uint64_t subkeys[16];
     des_key_schedule(key, subkeys);
     uint64_t ciphertext = des_encrypt(subkeys, plaintext);
     uint64_t plaintext_ = des_decrypt(subkeys, ciphertext);
     printf("%016" PRIX64 " %016" PRIX64 " %016" PRIX64 " %016" PRIX64 "\n", key, plaintext, ciphertext, plaintext_);
+    return EXIT_SUCCESS;
 }
