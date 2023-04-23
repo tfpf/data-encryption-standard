@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mt19937_64.h"
+#include "mt19937.h"
 
 // Initial permutation.
 int const IP[64] =
