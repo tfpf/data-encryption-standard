@@ -1,3 +1,0 @@
-[submodule "mersenne-twister"]
-	path = mersenne-twister
-	url = https://github.com/tfpf/mersenne-twister.git

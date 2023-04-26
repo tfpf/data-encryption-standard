@@ -1,9 +1,9 @@
 SHELL  = /bin/sh
 CC     = gcc
-CFLAGS = -O2 -std=c11 -Wall -Wextra -I./mersenne-twister/include
+CFLAGS = -O2 -std=c11 -Wall -Wextra
 RM     = rm -f
 
-Sources    = des.c ./mersenne-twister/lib/mt19937.c
+Sources    = des.c
 Executable = des
 
 .PHONY: clean

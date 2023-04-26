@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mt19937.h"
-
 // Initial permutation.
 int const IP[64] =
 {
@@ -380,9 +378,8 @@ int main(int const argc, char const *argv[])
         return EXIT_SUCCESS;
     }
 
-    mt19937_64_seed(0);
-    uint64_t key = argc >= 2 ? parse_hexadecimal(argv[1]) : mt19937_64_rand();
-    uint64_t state = argc >= 3 ? parse_hexadecimal(argv[2]) : mt19937_64_rand();
+    uint64_t key = argc >= 2 ? parse_hexadecimal(argv[1]) : 0;
+    uint64_t state = argc >= 3 ? parse_hexadecimal(argv[2]) : 0;
     if(argc >= 4 && strcmp(argv[3], "decrypt") == 0)
     {
         des_demo(key, state, false);
