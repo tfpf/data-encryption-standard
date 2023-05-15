@@ -8,11 +8,6 @@ ATmega328P.
 Several years later, with more programming experience and a better understanding of cryptographic specifications, I
 decided to revisit the horrible code and rewrite it properly. And here we are.
 
-### Download
-```
-git clone --recurse-submodules https://github.com/tfpf/data-encryption-standard.git
-```
-
 ### Compile
 ```
 make
@@ -30,9 +25,8 @@ The test vectors are from [sci.crypt](https://groups.google.com/g/sci.crypt/c/F6
 ./des [key] [data]
 ```
 
-`[key]` is the secret key; `[data]` is the data to encrypt. They must contain only hexadecimal digits. Otherwise, they
-will be set to zero. If not provided, they will be generated randomly using MT19937, which I have included my
-implementation of as a submodule here.
+`[key]` is the secret key; `[data]` is the data to encrypt. They must contain only hexadecimal digits. Otherwise (or if
+they are not provided), they will be set to zero.
 
 ### Decrypt
 ```
