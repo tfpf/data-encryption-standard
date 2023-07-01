@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,54 +137,21 @@ int const R[16] =
 /******************************************************************************
  * Parse a string into number.
  *
- * @param str String.
+ * @param str String containing hexadecimal digits.
  *
- * @return Number represented by at most 16 rightmost characters of the string
- *     if the entire string contains only hexadecimal digits, else 0.
+ * @return Number represented by the last 16 characters of the string if the
+ *     said characters are all hexadecimal, else 0.
  *****************************************************************************/
 uint64_t parse_hexadecimal(char const *str)
 {
-    uint64_t val = 0;
-    while(*str != '\0')
+    size_t len = strlen(str);
+    if(len > 16)
     {
-        int unsigned nibble;
-        switch(*str)
-        {
-            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-            nibble = *str - '0';
-            break;
-
-            case 'A': case 'a':
-            nibble = 10;
-            break;
-
-            case 'B': case 'b':
-            nibble = 11;
-            break;
-
-            case 'C': case 'c':
-            nibble = 12;
-            break;
-
-            case 'D': case 'd':
-            nibble = 13;
-            break;
-
-            case 'E': case 'e':
-            nibble = 14;
-            break;
-
-            case 'F': case 'f':
-            nibble = 15;
-            break;
-
-            default:
-            return 0;
-        }
-        val = val << 4 | nibble;
-        ++str;
+        str += len - 16;
     }
-    return val;
+    char *endptr;
+    uint64_t val = strtoull(str, &endptr, 16);
+    return *endptr == '\0' ? val : 0;
 }
 
 /******************************************************************************
@@ -378,9 +346,9 @@ int main(int const argc, char const *argv[])
         return EXIT_SUCCESS;
     }
 
-    uint64_t key = argc >= 2 ? parse_hexadecimal(argv[1]) : 0;
-    uint64_t state = argc >= 3 ? parse_hexadecimal(argv[2]) : 0;
-    if(argc >= 4 && strcmp(argv[3], "decrypt") == 0)
+    uint64_t key = argc > 1 ? parse_hexadecimal(argv[1]) : 0;
+    uint64_t state = argc > 2 ? parse_hexadecimal(argv[2]) : 0;
+    if(argc > 3 && strcmp(argv[3], "decrypt") == 0)
     {
         des_demo(key, state, false);
     }
